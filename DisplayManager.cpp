@@ -1,0 +1,53 @@
+#include "DisplayManager.h"
+#include <Arduino.h>
+
+DisplayManager::DisplayManager(LiquidCrystal_I2C &lcd) : lcd(lcd) {}
+int DisplayManager::getTargetTempPosition() { return targetTempPosition; }
+int DisplayManager::getTargetTempRow() { return targetTempRow; }
+
+int DisplayManager::getCurrentTempPosition() { return currentTempPosition; }
+int DisplayManager::getCurrentTempRow() { return currentTempRow; }
+
+void DisplayManager::begin() {
+  lcd.init();
+  lcd.backlight();
+  lcd.print("Thermostat v1.0");
+  delay(1500);
+  lcd.clear();
+  Serial.println("LCD started");
+}
+
+void DisplayManager::update(float currentTemp, float targetTemp, bool manualMode, bool relayState) {
+  lcd.clear();
+
+  // Строка 0: текущая и целевая температура
+  lcd.setCursor(0, 0);
+  lcd.print("T:");
+  updateTargetTemp(currentTemp, currentTempPosition, currentTempRow);
+  lcd.print(" S:");
+
+  updateTargetTemp(targetTemp, targetTempPosition, targetTempRow);
+
+  // Строка 1: режим и состояние нагревателя
+  lcd.setCursor(0, 1);
+  lcd.print(manualMode ? "Manual " : "Auto ");
+  lcd.print(relayState ? "ON " : "OFF");
+}
+
+void DisplayManager::updateTargetTemp(float targetTemp, int position, int row) {
+  Serial.println("updateTargetTemp called");
+
+  // Очистка предыдущего значения
+  lcd.setCursor(position, row);
+  lcd.print("    "); // очищаем 4 символа
+//5,0 - 3 знака
+  String buffer = String(targetTemp, 1); // один знак после запятой
+  Serial.println("buffer: " + buffer);
+
+  // Вычисляем позицию так, чтобы текст начинался с правого края
+  int startPos = position - buffer.length() + 1;
+  if (startPos < 0) startPos = 0;
+
+  lcd.setCursor(startPos, row);
+  lcd.print(buffer);
+}
