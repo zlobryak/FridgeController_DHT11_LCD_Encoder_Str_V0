@@ -20,6 +20,10 @@ void CoolingController::setManualMode(bool mode) {
 }
 
 void CoolingController::setRelayState(bool state) {
+    Serial.println(
+      String("RelayState: ") +
+      (state ? "On" : "Off")
+    );
     relayState = state;
     digitalWrite(relayPin, relayState ? LOW : HIGH);
 }

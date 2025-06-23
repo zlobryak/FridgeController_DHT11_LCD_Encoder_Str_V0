@@ -28,6 +28,7 @@ private:
   int currentTempRow = 0;
   int targetTempPosition = 15;
   int targetTempRow = 0;
+  int cleaner = 5;
 
 
 };

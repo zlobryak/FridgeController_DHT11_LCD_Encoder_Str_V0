@@ -18,6 +18,7 @@ void DisplayManager::begin() {
 }
 
 void DisplayManager::update(float currentTemp, float targetTemp, bool manualMode, bool relayState) {
+  Serial.println("LCD fully updated");
   lcd.clear();
 
   // Строка 0: текущая и целевая температура
@@ -36,17 +37,21 @@ void DisplayManager::update(float currentTemp, float targetTemp, bool manualMode
 
 void DisplayManager::updateTargetTemp(float targetTemp, int position, int row) {
   Serial.println("updateTargetTemp called");
+  Serial.print(position);
+  Serial.print(" ");
+  Serial.print(row);
 
-  // Очистка предыдущего значения
-  lcd.setCursor(position, row);
-  lcd.print("    "); // очищаем 4 символа
-//5,0 - 3 знака
   String buffer = String(targetTemp, 1); // один знак после запятой
   Serial.println("buffer: " + buffer);
 
   // Вычисляем позицию так, чтобы текст начинался с правого края
   int startPos = position - buffer.length() + 1;
   if (startPos < 0) startPos = 0;
+
+  for (int i = 0; i > cleaner; i++){
+    lcd.setCursor(position + i, row);
+    lcd.print(" ");
+  }
 
   lcd.setCursor(startPos, row);
   lcd.print(buffer);

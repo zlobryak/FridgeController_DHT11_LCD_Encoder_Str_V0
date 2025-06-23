@@ -32,6 +32,7 @@ void setup() {
   Serial.begin(9600);
   dht.begin();
   display.begin();
+  display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
   pinMode(ENCODER_SW, INPUT_PULLUP);
   Serial.println("Setup success");
 }
@@ -71,12 +72,15 @@ void loop() {
     float currentTemp = dht.readTemperature();
     if (!isnan(currentTemp)) {
       thermostat.update(currentTemp);
-      display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
+     // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
+      display.updateTargetTemp(currentTemp, display.getCurrentTempPosition(), display.getCurrentTempRow());
       while (digitalRead(ENCODER_SW) == LOW) delay(10);
     }
   }
 }
 
 //TODO  Добавить гистерезис
-//      Добавить реле
+//      Добавить ограничение на диапазон температуры
+//      Избавиться от вызова перерисовок экрана при замере темпиратуры
+//      Все перерисовки делать через точечную перерисовку
 //      Вынести энкодер в отдельный класс

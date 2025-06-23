@@ -16,7 +16,7 @@ public:
 
 private:
     int relayPin;
-    float targetTemp = 5.0;
+    float targetTemp = -15.0;
     bool manualMode = false;
     bool relayState = false;
 };
