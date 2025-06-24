@@ -1,4 +1,6 @@
 // CoolingController.h
+// This code was partially generated using an AI language model Qwen3-235B-A22B
+// Review and adjust as needed.
 #pragma once
 
 class CoolingController {
@@ -10,7 +12,7 @@ public:
 
     float getLastTemp() const;
     void setLastTemp(float currentTemp);
-    
+
     void setManualMode(bool mode);
     void setRelayState(bool state);
     void update(float currentTemp);

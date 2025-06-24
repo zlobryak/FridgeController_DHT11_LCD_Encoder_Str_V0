@@ -1,4 +1,6 @@
 // CoolingController.cpp
+// This code was partially generated using an AI language model Qwen3-235B-A22B
+// Review and adjust as needed.
 #include "CoolingController.h"
 #include <Arduino.h> 
 
