@@ -52,7 +52,7 @@ void loop() {
     while (digitalRead(ENCODER_SW) == LOW) delay(10);
   }
 
-  // --- Изменение температуры энкодером ---
+  // --- Изменение целевой температуры энкодером ---
   long newPosition = myEncoder.read() / 4;
   //Serial.print("Encoder position: ");
   //Serial.println(newPosition);
@@ -69,18 +69,24 @@ void loop() {
   // --- Автоматическое обновление температуры ---
   if (currentMillis - previousMillis >= checkInterval) {
     previousMillis = currentMillis;
+    
     float currentTemp = dht.readTemperature();
+    thermostat.setLastTemp(currentTemp);
     if (!isnan(currentTemp)) {
       thermostat.update(currentTemp);
      // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
+     if (thermostat.getLastTemp() != currentTemp){
       display.updateTargetTemp(currentTemp, display.getCurrentTempPosition(), display.getCurrentTempRow());
       while (digitalRead(ENCODER_SW) == LOW) delay(10);
+     }
     }
   }
 }
 
 //TODO  Добавить гистерезис
-//      Добавить ограничение на диапазон температуры
-//      Избавиться от вызова перерисовок экрана при замере темпиратуры
+//      Добавить ограничение на диапазон температуры done
+//      Избавиться от вызова перерисовок экрана при замере темпиратуры done
 //      Все перерисовки делать через точечную перерисовку
 //      Вынести энкодер в отдельный класс
+//      Перерисовка режимов рабты и значения "ON" "OFF"
+//      Некорректная обработка ручного переключения. done (но отображение не вызывается при автоматическом переключении)

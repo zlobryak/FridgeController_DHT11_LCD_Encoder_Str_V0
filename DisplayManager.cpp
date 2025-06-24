@@ -36,11 +36,11 @@ void DisplayManager::update(float currentTemp, float targetTemp, bool manualMode
 }
 
 void DisplayManager::updateTargetTemp(float targetTemp, int position, int row) {
-  Serial.println("updateTargetTemp called");
+  Serial.print("updateTargetTemp called: ");
   Serial.print(position);
   Serial.print(" ");
   Serial.print(row);
-
+  Serial.print(" ");
   String buffer = String(targetTemp, 1); // один знак после запятой
   Serial.println("buffer: " + buffer);
 

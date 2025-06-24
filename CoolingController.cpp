@@ -7,8 +7,22 @@ CoolingController::CoolingController(int pin) : relayPin(pin) {
     digitalWrite(relayPin, HIGH); // Реле выключено
 }
 
+void CoolingController::setLastTemp(float currentTemp){
+      lastTemp = currentTemp;
+    }
+
+float CoolingController::getLastTemp() const{
+  return lastTemp;
+}
+
 void CoolingController::setTargetTemp(float temp) {
-    targetTemp = temp;
+    if (temp < MIN_TARGET_TEMP) {
+        targetTemp = MIN_TARGET_TEMP;
+    } else if (temp > MAX_TARGET_TEMP) {
+        targetTemp = MAX_TARGET_TEMP;
+    } else {
+        targetTemp = temp;
+    }
 }
 
 float CoolingController::getTargetTemp() {
@@ -38,7 +52,7 @@ bool CoolingController::isCoolingOn() {
 
 void CoolingController::update(float currentTemp) {
     if (!manualMode) {
-        if (currentTemp > targetTemp) {  // ← ВАЖНО: поменяли сравнение
+        if (currentTemp > targetTemp) {
             setRelayState(true);         // Включаем охлаждение
         } else {
             setRelayState(false);        // Выключаем охлаждение

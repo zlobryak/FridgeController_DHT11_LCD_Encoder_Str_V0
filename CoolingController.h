@@ -7,6 +7,10 @@ public:
 
     void setTargetTemp(float temp);
     float getTargetTemp();
+
+    float getLastTemp() const;
+    void setLastTemp(float currentTemp);
+    
     void setManualMode(bool mode);
     void setRelayState(bool state);
     void update(float currentTemp);
@@ -16,7 +20,12 @@ public:
 
 private:
     int relayPin;
-    float targetTemp = -15.0;
+    float targetTemp = 4.0;
+    float lastTemp = 0.0;
     bool manualMode = false;
     bool relayState = false;
+
+    private:
+    static constexpr float MIN_TARGET_TEMP = -15.0f;
+    static constexpr float MAX_TARGET_TEMP = 15.0f;
 };
