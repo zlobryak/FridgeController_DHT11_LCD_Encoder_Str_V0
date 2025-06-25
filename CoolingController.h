@@ -7,7 +7,7 @@ class CoolingController {
 public:
     CoolingController(int relayPin);
 
-    void setTargetTemp(float temp);
+    void setTargetTemp(float currentTemp);
     float getTargetTemp();
 
     float getLastTemp() const;

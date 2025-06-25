@@ -3,25 +3,27 @@
 //EncoderHandler.h
 #pragma once
 #include <Encoder.h>
+#include <Arduino.h>
 
-class EncoderHandler{
+class EncoderHandler {
   public:
-    EncoderHandler(int pinDT, int pinCLK, int pinSW)
-
-    void update(); // Обновляем состояние энкодера
+    EncoderHandler(int pinDT, int pinCLK, int pinSW);
+    // Возвращаем состояние кнопки
+    bool isButtonPressed();
 
     // Получаем направление поворота: +1 (вправо), -1 (влево), 0 (нет изменений)
     int getDirection();
+    // Возвращаем положение энкодера
+    long GetCurrentPosition();
+    long SetcurrentPosition();
 
-    // Проверяем нажатие кнопки
-    bool isButtonPressed();
 
   private:
-      Encoder encoder;
+    Encoder encoder;
     int swPin;
 
     long lastPosition = 0;
     long currentPosition = 0;
     bool buttonPressed = false;
 
-}
+};

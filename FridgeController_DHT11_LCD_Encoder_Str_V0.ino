@@ -3,24 +3,26 @@
 
 #include "DisplayManager.h"
 #include "CoolingController.h"
+#include "EncoderHandler.h"
+
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-
 #include <DHT.h>
 #include <Encoder.h>
 
 
 // === Настройки пинов ===
 #define DHTPIN 2
-#define DHT11
+#define DHTTYPE DHT_TYPE_DHT11
 #define RELAY_PIN 3
 #define ENCODER_CLK 6
 #define ENCODER_DT 5
 #define ENCODER_SW 4
 
 // === Объекты ===
-DHT dht(DHTPIN, 11); // можно просто указать тип датчика числом
-Encoder myEncoder(ENCODER_DT, ENCODER_CLK);
+DHT dht(DHTPIN, 11); // можно просто указать тип датчика числом (11 или 22)
+Encoder myEncoder(ENCODER_DT, ENCODER_CLK); //Старый объект, который работает из бибилиотеки, временно остается, пока идут эксперименты
+EncoderHandler encoder(ENCODER_DT, ENCODER_CLK, ENCODER_SW); //Объект для нового класса
 
 LiquidCrystal_I2C lcd(0x27, 16, 2);
 DisplayManager display(lcd);

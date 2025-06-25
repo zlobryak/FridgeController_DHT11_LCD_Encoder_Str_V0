@@ -11,20 +11,24 @@ CoolingController::CoolingController(int pin) : relayPin(pin) {
 
 void CoolingController::setLastTemp(float currentTemp){
       lastTemp = currentTemp;
+      Serial.print("LastTemp set: ");
+      Serial.println(lastTemp);
     }
 
 float CoolingController::getLastTemp() const{
   return lastTemp;
 }
 
-void CoolingController::setTargetTemp(float temp) {
-    if (temp < MIN_TARGET_TEMP) {
+void CoolingController::setTargetTemp(float currentTemp) {
+    if (currentTemp < MIN_TARGET_TEMP) {
         targetTemp = MIN_TARGET_TEMP;
-    } else if (temp > MAX_TARGET_TEMP) {
+    } else if (currentTemp > MAX_TARGET_TEMP) {
         targetTemp = MAX_TARGET_TEMP;
     } else {
-        targetTemp = temp;
+        targetTemp = currentTemp;
     }
+    Serial.print("TargetTemp set: ");
+    Serial.println(currentTemp);
 }
 
 float CoolingController::getTargetTemp() {
@@ -33,6 +37,8 @@ float CoolingController::getTargetTemp() {
 
 void CoolingController::setManualMode(bool mode) {
     manualMode = mode;
+    Serial.print("Mode changed to: ");
+    Serial.println(mode ? "Manual" : "Auto");
 }
 
 void CoolingController::setRelayState(bool state) {
@@ -60,4 +66,13 @@ void CoolingController::update(float currentTemp) {
             setRelayState(false);        // Выключаем охлаждение
         }
     }
+    Serial.print("Controller update called. ");
+    Serial.print("Mode: ");
+    Serial.print(manualMode ? "Manual " : "Auto ");
+    Serial.print("currentTemp: ");
+    Serial.print(currentTemp);
+    Serial.print(" ");
+    Serial.print("targetTemp: ");
+    Serial.println(targetTemp);
+
 }
