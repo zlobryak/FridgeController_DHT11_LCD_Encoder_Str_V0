@@ -53,7 +53,6 @@ void CoolingController::setRelayState(bool state) {
 bool CoolingController::isManualMode() {
     return manualMode;
 }
-
 bool CoolingController::isCoolingOn() {
     return relayState;
 }

@@ -47,6 +47,7 @@ void DisplayManager::updateTargetTemp(float targetTemp, int position, int row) {
   String buffer = String(targetTemp, 1); // один знак после запятой
   Serial.println("buffer: " + buffer);
 
+
   // Вычисляем позицию так, чтобы текст начинался с правого края
   int startPos = position - buffer.length() + 1;
   if (startPos < 0) startPos = 0;
@@ -58,4 +59,26 @@ void DisplayManager::updateTargetTemp(float targetTemp, int position, int row) {
 
   lcd.setCursor(startPos, row);
   lcd.print(buffer);
+}
+
+void DisplayManager::updateTargetText(String text, int position, int row){
+  Serial.print("updateTargetText called: ");
+  Serial.print(position);
+  Serial.print(" ");
+  Serial.print(row);
+  Serial.print(" ");
+  Serial.println(text);
+
+
+  // Вычисляем позицию так, чтобы текст начинался с правого края
+  int startPos = position - text.length() + 1;
+  if (startPos < 0) startPos = 0;
+
+  for (int i = 0; i > text.length(); i++){
+    lcd.setCursor(position + i, row);
+    lcd.print(" ");
+  }
+
+  lcd.setCursor(startPos, row);
+  lcd.print(text);
 }
