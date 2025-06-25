@@ -15,7 +15,7 @@ void CoolingController::setLastTemp(float currentTemp){
       Serial.println(lastTemp);
     }
 
-float CoolingController::getLastTemp() const{
+float CoolingController::getLastTemp(){
   return lastTemp;
 }
 
@@ -64,6 +64,7 @@ void CoolingController::update(float currentTemp) {
         } else {
             setRelayState(false);        // Выключаем охлаждение
         }
+        lastTemp = currentTemp;
     }
     Serial.print("Controller update called. ");
     Serial.print("Mode: ");

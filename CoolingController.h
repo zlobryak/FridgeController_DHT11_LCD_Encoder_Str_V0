@@ -10,7 +10,7 @@ public:
     void setTargetTemp(float currentTemp);
     float getTargetTemp();
 
-    float getLastTemp() const;
+    float getLastTemp();
     void setLastTemp(float currentTemp);
 
     void setManualMode(bool mode);

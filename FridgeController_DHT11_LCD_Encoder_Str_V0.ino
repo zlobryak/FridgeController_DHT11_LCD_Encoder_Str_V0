@@ -6,25 +6,32 @@
 
 #include <Wire.h>
 #include <LiquidCrystal_I2C.h>
-#include <DHT.h>
+
 #include <Encoder.h>
+#include <OneWire.h>
+#include <DallasTemperature.h>
 
 
 // === Настройки пинов ===
-#define DHTPIN 2
-#define DHTTYPE DHT_TYPE_DHT11
-#define RELAY_PIN 3
-#define ENCODER_CLK 6
+#define ONE_WIRE_BUS 7         // Пин подключения DS18B20
+
+#define RELAY_PIN 3 //Реле
+//Пины энкодера
+#define ENCODER_CLK 6 
 #define ENCODER_DT 5
 #define ENCODER_SW 4
 
 // === Объекты ===
-DHT dht(DHTPIN, 11); // можно просто указать тип датчика числом (11 или 22)
+OneWire oneWire(ONE_WIRE_BUS);               // Подключение к шине OneWire
+DallasTemperature sensors(&oneWire);         // Датчики температуры
+DeviceAddress sensorAddress;                 // Адрес датчика (если несколько)
+
+
 Encoder myEncoder(ENCODER_DT, ENCODER_CLK); //Обьект энкодера из библиотки
 
-LiquidCrystal_I2C lcd(0x27, 16, 2);
-DisplayManager display(lcd);
-CoolingController thermostat(RELAY_PIN);
+LiquidCrystal_I2C lcd(0x27, 16, 2); //Создаем экран
+DisplayManager display(lcd); //создаем объект класса DisplayManager
+CoolingController thermostat(RELAY_PIN); //Объект термостата
 
 long lastEncoderPos = 0;
 
@@ -32,20 +39,29 @@ unsigned long checkInterval = 5000;
 unsigned long previousMillis = 0;
 
 void setup() {
-  Serial.begin(9600);
-  dht.begin();
-  display.begin();
+  Serial.begin(9600);  
+      // Инициализация датчика температуры
+  sensors.begin();
+  if (!sensors.getAddress(sensorAddress, 0)) {
+    Serial.println("DS18B20 error");
+  } else {
+    sensors.setResolution(sensorAddress, 12); // Максимальная точность
+  }
+  sensors.requestTemperatures(); //Опрос датчика
+  //Рисуем рпедварительные значения
+  display.begin(); //Инициалицаация дисплея
   display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
-  display.updateTargetTemp(dht.readTemperature(), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
+  display.updateTargetTemp(sensors.getTempCByIndex(0), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
   display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
   display.updateTargetText(thermostat.isManualMode() ? "Auto" : "Manual",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
   pinMode(ENCODER_SW, INPUT_PULLUP);
+
+
   Serial.println("Setup success");
 }
 
 void loop() {
   unsigned long currentMillis = millis();
-
   // --- Обработка нажатия на энкодер ---
   if (digitalRead(ENCODER_SW) == LOW) {
     delay(50); // Антидребезг
@@ -54,8 +70,9 @@ void loop() {
     if (newMode) {
       thermostat.setRelayState(!thermostat.isCoolingOn());
     }
+    sensors.requestTemperatures();
     display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
-    display.updateTargetTemp(dht.readTemperature(), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
+    display.updateTargetTemp(sensors.getTempCByIndex(0), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
     display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
     display.updateTargetText(thermostat.isManualMode() ? "Manual" : "Auto",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
    // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
@@ -80,12 +97,14 @@ void loop() {
   if (currentMillis - previousMillis >= checkInterval) {
     previousMillis = currentMillis;
     
-    float currentTemp = dht.readTemperature();
-    thermostat.setLastTemp(currentTemp);
-    if (!isnan(currentTemp)) {
-      thermostat.update(currentTemp);
+    sensors.requestTemperatures();
+    float currentTemp = sensors.getTempCByIndex(0);
+    Serial.print("Measurment: ");
+    Serial.println(currentTemp);
+    if (!isnan(currentTemp)) {      
      // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
      if (thermostat.getLastTemp() != currentTemp){
+      thermostat.update(currentTemp);
       display.updateTargetTemp(currentTemp, display.getCurrentTempPosition() ,display.getCurrentTempRow(), display.getTempCleaner());
                 while (digitalRead(ENCODER_SW) == LOW) delay(10);
      }
@@ -93,6 +112,7 @@ void loop() {
 
     }
   }
+
 }
 
 //TODO  Добавить гистерезис
