@@ -35,7 +35,10 @@ void setup() {
   Serial.begin(9600);
   dht.begin();
   display.begin();
-  display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
+  display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
+  display.updateTargetTemp(dht.readTemperature(), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
+  display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
+  display.updateTargetText(thermostat.isManualMode() ? "Auto" : "Manual",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
   pinMode(ENCODER_SW, INPUT_PULLUP);
   Serial.println("Setup success");
 }
@@ -51,7 +54,11 @@ void loop() {
     if (newMode) {
       thermostat.setRelayState(!thermostat.isCoolingOn());
     }
-    display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
+    display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
+    display.updateTargetTemp(dht.readTemperature(), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
+    display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
+    display.updateTargetText(thermostat.isManualMode() ? "Manual" : "Auto",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
+   // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
     while (digitalRead(ENCODER_SW) == LOW) delay(10);
   }
 
@@ -66,7 +73,7 @@ void loop() {
       thermostat.setTargetTemp(thermostat.getTargetTemp() + 0.1f);
     }
     lastEncoderPos = newPosition;
-    display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow());
+    display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
   }
 
   // --- Автоматическое обновление температуры ---
@@ -79,9 +86,11 @@ void loop() {
       thermostat.update(currentTemp);
      // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
      if (thermostat.getLastTemp() != currentTemp){
-      display.updateTargetTemp(currentTemp, display.getCurrentTempPosition(), display.getCurrentTempRow());
-      while (digitalRead(ENCODER_SW) == LOW) delay(10);
+      display.updateTargetTemp(currentTemp, display.getCurrentTempPosition() ,display.getCurrentTempRow(), display.getTempCleaner());
+                while (digitalRead(ENCODER_SW) == LOW) delay(10);
      }
+      display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off", display.getOnOffPosition(), display.getOnOffRow(), display.getOnOffCleaner());
+
     }
   }
 }
