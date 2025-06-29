@@ -2,6 +2,7 @@
 // Review and adjust as needed.
 
 #include "DisplayManager.h"
+#include "CoolingController.h"
 #include <Arduino.h>
 
 DisplayManager::DisplayManager(LiquidCrystal_I2C &lcd) : lcd(lcd) {}
@@ -10,39 +11,49 @@ int DisplayManager::getTargetTempRow() { return targetTempRow; }
 
 int DisplayManager::getCurrentTempPosition() { return currentTempPosition; }
 int DisplayManager::getCurrentTempRow() { return currentTempRow; }
+
+int DisplayManager::getTempCleaner() { return tempCleaner; } //Один геттер для обеих температур
+
 int DisplayManager::getOnOffPosition() { return modeOnOffPosition; }
 int DisplayManager::getOnOffRow() { return modeOnOffRow; }
+int DisplayManager::getOnOffCleaner() { return onOffCleaner; }
+
 int DisplayManager::getModePosition() { return modePosition; }
 int DisplayManager::getModeRow() { return modeRow; }
-int DisplayManager::getTempCleaner() { return tempCleaner; }
 int DisplayManager::getModeCleaner() { return modeCleaner; }
-int DisplayManager::getOnOffCleaner() { return onOffCleaner; }
+
+String DisplayManager::getCurrentTempSignature() { return currentTempSignature; }
+int DisplayManager::getCurrentTempSignaturePosition() { return currentTempSignaturePosition; }
+int DisplayManager::getCurrentTempSignatureRow() { return currentTempSignatureRow; }
+int DisplayManager::getCurrentTempSignatureCleaner() { return currentTempSignatureCleaner; }
+String DisplayManager::getTargetTempSignature() { return targetTempSignature; }
+int DisplayManager::getTargetTempSignaturePosition() { return targetTempSignaturePosition; }
+int DisplayManager::getTargetTempSignatureRow() { return targetTempSignatureRow; }
+int DisplayManager::getTargetTempSignatureCleaner() { return targetTempSignatureCleaner; }
+
 
 void DisplayManager::begin() {
   lcd.init();
   lcd.backlight();
-  lcd.print("Thermostat v1.0");
-  delay(1500);
+  lcd.print("Loading");
+  delay(500);
   lcd.clear();
   Serial.println("LCD started");
 }
 
-void DisplayManager::update(float currentTemp, float targetTemp, bool manualMode, bool relayState) {
+void DisplayManager::update(CoolingController thermostat) {
   Serial.println("LCD fully updated");
   lcd.clear();
+  updateTargetTemp(thermostat.getLastTemp(), currentTempPosition, currentTempRow, tempCleaner); // Выводит на экран текущую температуру
 
-  // Строка 0: текущая и целевая температура
-  lcd.setCursor(0, 0);
-  lcd.print("T:");
-  updateTargetTemp(currentTemp, currentTempPosition, currentTempRow, tempCleaner);
-  lcd.print(" S:");
+  updateTargetText(targetTempSignature, currentTempSignaturePosition, currentTempSignatureRow, currentTempSignatureCleaner); // Подпись текущей температуры
+  updateTargetText(currentTempSignature, targetTempSignaturePosition, targetTempSignatureRow, targetTempSignatureCleaner); // Подпись заданной температуры
 
-  updateTargetTemp(targetTemp, targetTempPosition, targetTempRow, tempCleaner);
+  updateTargetTemp(thermostat.getTargetTemp(), targetTempPosition, targetTempRow, tempCleaner); //Выводит на экран заданную температуру
 
-  // Строка 1: режим и состояние нагревателя
-  lcd.setCursor(0, 1);
-  lcd.print(manualMode ? "Manual " : "Auto ");
-  lcd.print(relayState ? "ON " : "OFF");
+  updateTargetText(thermostat.isManualMode() ? "Auto" : "Manual", modePosition, modeRow, modeCleaner);
+
+  updateTargetText(thermostat.isCoolingOn() ? "On" : "Off", modeOnOffPosition, modeOnOffRow, onOffCleaner);
 }
 
 void DisplayManager::updateTargetTemp(float targetTemp, int position, int row, int tempCleaner) {

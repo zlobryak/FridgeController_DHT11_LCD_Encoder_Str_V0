@@ -5,13 +5,14 @@
 #define DISPLAY_MANAGER_H
 
 #include <LiquidCrystal_I2C.h>
+#include "CoolingController.h"
 
 class DisplayManager {
 public:
   DisplayManager(LiquidCrystal_I2C &lcd);
 
   void begin();
-  void update(float currentTemp, float targetTemp, bool manualMode, bool relayState);
+  void update(CoolingController thermostat);
 
   void updateTargetTemp(float targetTemp, int position, int row, int cleaner);
 
@@ -32,6 +33,17 @@ public:
   int getModeRow();
   int getModeCleaner();
 
+  String getCurrentTempSignature();
+  int getCurrentTempSignaturePosition();
+  int getCurrentTempSignatureRow();
+  int getCurrentTempSignatureCleaner();
+
+  String getTargetTempSignature();
+  int getTargetTempSignaturePosition();
+  int getTargetTempSignatureRow();
+  int getTargetTempSignatureCleaner();
+
+
   
 private:
   LiquidCrystal_I2C &lcd;
@@ -51,6 +63,16 @@ private:
 
   int modePosition = 11;
   int modeRow = 1;
+
+  String currentTempSignature = "T:"; //Подпист для текущей температуры
+  int currentTempSignaturePosition = 1;
+  int currentTempSignatureRow = 0;
+  int currentTempSignatureCleaner = 2;
+
+  String targetTempSignature = "S:"; //Подпись для заданной температуры
+  int targetTempSignaturePosition = 10;
+  int targetTempSignatureRow = 0;
+  int targetTempSignatureCleaner = 2;
 };
 
 #endif

@@ -48,15 +48,13 @@ void setup() {
     sensors.setResolution(sensorAddress, 12); // Максимальная точность
   }
   sensors.requestTemperatures(); //Опрос датчика
-  //Рисуем рпедварительные значения
+  thermostat.update(sensors.getTempCByIndex(0)); // Запись значений датчиков в термостат
+   
   display.begin(); //Инициалицаация дисплея
-  display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
-  display.updateTargetTemp(sensors.getTempCByIndex(0), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
-  display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
-  display.updateTargetText(thermostat.isManualMode() ? "Auto" : "Manual",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
+  display.update(thermostat); // Отрисовка экрана
+
+  
   pinMode(ENCODER_SW, INPUT_PULLUP);
-
-
   Serial.println("Setup success");
 }
 
@@ -102,7 +100,7 @@ void loop() {
     Serial.print("Measurment: ");
     Serial.println(currentTemp);
     if (!isnan(currentTemp)) {      
-     // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
+    
      if (thermostat.getLastTemp() != currentTemp){
       thermostat.update(currentTemp);
       display.updateTargetTemp(currentTemp, display.getCurrentTempPosition() ,display.getCurrentTempRow(), display.getTempCleaner());
