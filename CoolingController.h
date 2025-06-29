@@ -27,6 +27,8 @@ private:
     bool manualMode = false;
     bool relayState = false;
 
+    float hysteresis = 0.5;
+
     private:
     static constexpr float MIN_TARGET_TEMP = -15.0f;
     static constexpr float MAX_TARGET_TEMP = 15.0f;

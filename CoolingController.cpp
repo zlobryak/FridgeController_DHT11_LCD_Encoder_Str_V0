@@ -59,9 +59,9 @@ bool CoolingController::isCoolingOn() {
 
 void CoolingController::update(float currentTemp) {
     if (!manualMode) {
-        if (currentTemp > targetTemp) {
+        if (currentTemp > targetTemp + hysteresis) {
             setRelayState(true);         // Включаем охлаждение
-        } else {
+        } else if (currentTemp < targetTemp - hysteresis) {
             setRelayState(false);        // Выключаем охлаждение
         }
         lastTemp = currentTemp;
@@ -71,8 +71,9 @@ void CoolingController::update(float currentTemp) {
     Serial.print(manualMode ? "Manual " : "Auto ");
     Serial.print("currentTemp: ");
     Serial.print(currentTemp);
-    Serial.print(" ");
-    Serial.print("targetTemp: ");
+    Serial.print(" targetTemp: ");
     Serial.println(targetTemp);
+    Serial.print(" Hysteresis: ");
+    Serial.println(hysteresis);
 
 }

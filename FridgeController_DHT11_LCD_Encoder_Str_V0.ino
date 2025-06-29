@@ -69,8 +69,8 @@ void loop() {
       thermostat.setRelayState(!thermostat.isCoolingOn());
     }
     sensors.requestTemperatures();
-    display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
-    display.updateTargetTemp(sensors.getTempCByIndex(0), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
+  //  display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
+  // display.updateTargetTemp(sensors.getTempCByIndex(0), display.getCurrentTempPosition(), display.getCurrentTempRow(), display.getTempCleaner());
     display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
     display.updateTargetText(thermostat.isManualMode() ? "Manual" : "Auto",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
    // display.update(dht.readTemperature(), thermostat.getTargetTemp(), thermostat.isManualMode(), thermostat.isCoolingOn());
@@ -113,10 +113,10 @@ void loop() {
 
 }
 
-//TODO  Добавить гистерезис
+//TODO  Добавить гистерезис done 
 
 
-//      Все перерисовки делать через точечную перерисовку
+//      Все перерисовки делать через точечную перерисовку Done
 //      Вынести энкодер в отдельный класс
 //      Перерисовка режимов рабты и значения "ON" "OFF"
 //
