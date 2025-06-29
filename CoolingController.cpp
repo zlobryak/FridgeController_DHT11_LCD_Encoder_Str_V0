@@ -42,10 +42,7 @@ void CoolingController::setManualMode(bool mode) {
 }
 
 void CoolingController::setRelayState(bool state) {
-    Serial.println(
-      String("RelayState: ") +
-      (state ? "On" : "Off")
-    );
+    Serial.println(String("RelayState: ") + (state ? "On" : "Off"));
     relayState = state;
     digitalWrite(relayPin, relayState ? LOW : HIGH);
 }
@@ -72,7 +69,7 @@ void CoolingController::update(float currentTemp) {
     Serial.print("currentTemp: ");
     Serial.print(currentTemp);
     Serial.print(" targetTemp: ");
-    Serial.println(targetTemp);
+    Serial.print(targetTemp);
     Serial.print(" Hysteresis: ");
     Serial.println(hysteresis);
 
