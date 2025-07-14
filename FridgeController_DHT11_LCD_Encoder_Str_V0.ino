@@ -14,7 +14,7 @@
 
 
 // === Настройки пинов ===
-#define ONE_WIRE_BUS 7         // Пин подключения DS18B20
+#define ONE_WIRE_BUS 8         // Пин подключения DS18B20
 
 #define RELAY_PIN 3 //Реле
 //Пины энкодера
@@ -46,6 +46,7 @@ void setup() {
   if (!sensors.getAddress(sensorAddress, 0)) {
     Serial.println("DS18B20 error");
   } else {
+    Serial.println("DS18B20 online");
     sensors.setResolution(sensorAddress, 12); // Максимальная точность
   }
   sensors.requestTemperatures(); //Опрос датчика
@@ -55,66 +56,21 @@ void setup() {
   display.update(thermostat); // Отрисовка экрана
 
   encoder.update();
-  
+
+  pinMode(ONE_WIRE_BUS, INPUT_PULLUP);
   pinMode(ENCODER_SW, INPUT_PULLUP);
   Serial.println("Setup success");
 }
 
 void loop() {
-  unsigned long currentMillis = millis();
-
-  // --- Обработка нажатия на энкодер ---
-  if (digitalRead(ENCODER_SW) == LOW) {
-    delay(50); // Антидребезг
-    bool newMode = !thermostat.isManualMode();
-    thermostat.setManualMode(newMode);
-
-  // При переходе в ручной режим, по умолчанию выключим реле.
-    if (thermostat.isManualMode()) {
-      thermostat.setRelayState(false);
-    }  
-
-    display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off",display.getOnOffPosition(),display.getOnOffRow(), display.getOnOffCleaner());
-    display.updateTargetText(thermostat.isManualMode() ? "Manual" : "Auto",display.getModePosition(),display.getModeRow(), display.getModeCleaner());
-  
-    while (digitalRead(ENCODER_SW) == LOW) delay(10);
-  }
-
-  // --- Изменение целевой температуры энкодером ---
-//  long newPosition = myEncoder.read() / 4;
-  //Serial.print("Encoder position: ");
-  //Serial.println(newPosition);
-//  if (newPosition != lastEncoderPos) {
-//    if (newPosition > lastEncoderPos) {
-//      thermostat.setTargetTemp(thermostat.getTargetTemp() - 0.1f);
-//    } else {
-//      thermostat.setTargetTemp(thermostat.getTargetTemp() + 0.1f);
-//    }
-//    lastEncoderPos = newPosition;
-//    display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
-//  }
-
-    // --- Поворот энкодера: изменение целевой температуры или состояния реле ---
-  int dir = encoder.getDirection();
-  if (dir != 0) {
-    if (thermostat.isManualMode()) {
-      
-      display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off", display.getOnOffPosition(), display.getOnOffRow(), display.getOnOffCleaner());
-    } else {
-      // В автоматическом режиме: меняем целевую температуру
-      float step = 0.1f;
-      float newTargetTemp = thermostat.getTargetTemp() - dir * step;
-      thermostat.setTargetTemp(newTargetTemp);
-      display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
-    }
-  }
+  unsigned long currentMillis = millis(); 
 
   // --- Автоматическое обновление температуры ---
   if (currentMillis - previousMillis >= checkInterval) {
-    previousMillis = currentMillis;
-    
+    previousMillis = currentMillis;  
     sensors.requestTemperatures();
     float currentTemp = sensors.getTempCByIndex(0);
+    
     Serial.print("Measurment: ");
     Serial.println(currentTemp);
     if (!isnan(currentTemp) && !thermostat.isManualMode()) {      
@@ -129,14 +85,53 @@ void loop() {
     }
   }
 
+  // --- Обработка нажатия на энкодер ---
+  if (encoder.isButtonPressed()) {
+    //меняем режим работы на противоположный
+    bool newMode = !thermostat.isManualMode();
+    thermostat.setManualMode(newMode);
+
+  // При переходе в ручной режим, по умолчанию выключим реле.
+    if (thermostat.isManualMode()) {
+      thermostat.setRelayState(false);
+    }
+  // Обновим информацию по состоянию и режиму на экране
+    display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off", display.getOnOffPosition(), display.getOnOffRow(), display.getOnOffCleaner());
+    display.updateTargetText(thermostat.isManualMode() ? "Manual" : "Auto", display.getModePosition(), display.getModeRow(), display.getModeCleaner());
+  }
+
+  if (encoder.isButtonLongPressed) {
+    isAdjustingHysteresis = !isAdjustingHysteresis;
+
+    if (isAdjustingHysteresis) {
+    display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off", display.getOnOffPosition(), display.getOnOffRow(), display.getOnOffCleaner());
+    } else {
+      thermostat.setHysteresis(thermostat.getHysteresis()); // Сохранить/применить
+      display.update(thermostat); // Вернуть обычный экран
+    }
+  }
+
+
+    // --- Поворот энкодера: изменение целевой температуры или состояния реле ---
+  int dir = encoder.getDirection();
+  if (dir != 0) {
+    if (thermostat.isManualMode()) {
+    // В ручном режиме: поворот энкодера меняет состояние реле
+    if (dir > 0) {
+      thermostat.setRelayState(true); // Повернули вправо — включаем
+    } else {
+      thermostat.setRelayState(false); // Повернули влево — выключаем
+    }
+      display.updateTargetText(thermostat.isCoolingOn() ? "On" : "Off", display.getOnOffPosition(), display.getOnOffRow(), display.getOnOffCleaner());
+    } else {
+      // В автоматическом режиме: меняем целевую температуру
+      float step = 0.1f;
+      float newTargetTemp = thermostat.getTargetTemp() - dir * step;
+      thermostat.setTargetTemp(newTargetTemp);
+      display.updateTargetTemp(thermostat.getTargetTemp(), display.getTargetTempPosition(), display.getTargetTempRow(), display.getTempCleaner());
+    }
+  }
+
 }
-
-//TODO  
-//      Добавить гистерезис done 
-
-//      Двойное назначение энкодера : например, длинное нажатие — переход к настройке гистерезиса
-
-//      Вынести энкодер в отдельный класс
-
-//      Некорректная обработка ручного переключения. done (но отображение не вызывается при автоматическом переключении)
-//      Для чего нужно добавить ручную прорисовук режима и On Of, а затем вызывать этим методы в автоматическом обновлении
+// TODO
+// Дописать метод изменения гистерезица поворотом энкодера, после перехода в этот режим догим нажатием на кнопку

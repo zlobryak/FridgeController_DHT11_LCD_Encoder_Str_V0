@@ -9,6 +9,9 @@ CoolingController::CoolingController(int pin) : relayPin(pin) {
     digitalWrite(relayPin, HIGH); // Реле выключено
 }
 
+void CoolingController::getHysteresis() { return hysteresis; }
+void CoolingController::setHysteresis(float hyst) { hysteresis = hyst; }
+
 void CoolingController::setLastTemp(float currentTemp){
       lastTemp = currentTemp;
       Serial.print("LastTemp set: ");
@@ -44,7 +47,7 @@ void CoolingController::setManualMode(bool mode) {
 void CoolingController::setRelayState(bool state) {
     Serial.println(String("RelayState: ") + (state ? "On" : "Off"));
     relayState = state;
-    digitalWrite(relayPin, relayState ? LOW : HIGH);
+    digitalWrite(relayPin, relayState ? LOW : HIGH); //Включает или выклдчает реле, в зависимости от полученного значения
 }
 
 bool CoolingController::isManualMode() {
@@ -54,9 +57,10 @@ bool CoolingController::isCoolingOn() {
     return relayState;
 }
 
+//В автоматическом пежиме работы, вызываем этот метод руглярно, велючая реле, когда температура поднимится выше установленоой цели
 void CoolingController::update(float currentTemp) {
     if (!manualMode) {
-        if (currentTemp > targetTemp + hysteresis) {
+        if (currentTemp > targetTemp + hysteresis) {  //Проверка на соответсвие целевой темперуре
             setRelayState(true);         // Включаем охлаждение
         } else if (currentTemp < targetTemp - hysteresis) {
             setRelayState(false);        // Выключаем охлаждение

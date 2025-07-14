@@ -20,6 +20,10 @@ public:
     bool isManualMode();
     bool isCoolingOn();
 
+    float getHysteresis();
+    void setHysteresis(float hysteresis);
+    
+
 private:
     int relayPin;
     float targetTemp = 4.0;
@@ -28,6 +32,7 @@ private:
     bool relayState = false;
 
     float hysteresis = 0.5;
+    bool isAdjustingHysteresis = false;
 
     private:
     static constexpr float MIN_TARGET_TEMP = -15.0f;
